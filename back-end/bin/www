@@ -26,8 +26,11 @@ var io = require('socket.io')(server);
 io.on('connection', function(socket){
  console.log('a user connected');
   socket.on('sendMessage', function(message, name) {
-    console.log(message, name);
+    // console.log(message, name);
     io.emit('sendMessageToAll', message, name);
+  });
+  socket.on('sendPosition', function(location, userName) {
+    io.emit('sendPositionToAll', location, userName);
   });
 });
 

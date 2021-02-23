@@ -7,6 +7,9 @@ import * as Permissions from 'expo-permissions';
 import {connect} from 'react-redux'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+var socket = socketIOClient("http://172.17.1.83:3000");
+import socketIOClient from "socket.io-client";
+
 
 
 function Map(props) {
@@ -21,6 +24,7 @@ function Map(props) {
     // const [newPOI, setNewPOI] = useState({});
     const [openPOI, setOpenPOI] = useState(false);
     //const [POILIst, setPOIList] = useState([])
+    const [listUsers, setListUsers] = useState([])
 
     const toggleOverlay = () => {
         setVisible(!visible);
@@ -31,9 +35,11 @@ function Map(props) {
         async function askPermissions() {
             let { status } = await Permissions.askAsync(Permissions.LOCATION);
             if (status === 'granted') {
-              Location.watchPositionAsync({ distanceInterval: 10 },
+              Location.watchPositionAsync({ distanceInterval: 2 },
                 (location) => {
-                  setLocation({latitude: location.coords.latitude, longitude: location.coords.longitude })
+                  setLocation({latitude: location.coords.latitude, longitude: location.coords.longitude });
+                  var myLocation = JSON.stringify(location)
+                  socket.emit("sendPosition", myLocation, props.userName);
                 }
               );
             }
@@ -47,8 +53,18 @@ function Map(props) {
                 props.addToPOIList(POIData[i])
               }
             }
+          
         });
       }, []);
+    
+      useEffect(() => {
+        socket.on('sendPositionToAll', (location, userName)=> {
+          var myLocation = JSON.parse(location);
+          var newLocation = {name: userName, latitude: myLocation.coords.latitude, longitude: myLocation.coords.longitude};
+          var result = listUsers.filter(item => item.name != userName);
+          setListUsers([...result, newLocation]);
+        });
+      }, [listUsers]);
 
 
     useEffect(() => {
@@ -84,8 +100,15 @@ function Map(props) {
             }}
             onPress={(e) => {addPOI(e)}}
         >
-            {location ?
-           <Marker coordinate={{ latitude : location.latitude, longitude : location.longitude}} pinColor="#fd79a8" title={props.userName} description='I am here'/>: null }
+            {/* {location ?
+           <Marker coordinate={{ latitude : location.latitude, longitude : location.longitude}} pinColor="#fd79a8" title={props.userName} description='I am here'/>: null } */}
+
+           {listUsers.length > 0 ?
+            listUsers.map((element, i) => {
+              return(
+                <Marker coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#333333" title={element.name}/>)
+            })
+            : null }           
             
             {props.POILIst.length > 0 ?
             props.POILIst.map((element, i) => {
