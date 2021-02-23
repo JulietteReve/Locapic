@@ -8,7 +8,8 @@ import {connect} from 'react-redux';
 
 
 function Home(props) {
-    const [name, setName] = useState('');
+    const [name, setName] = useState(null);
+    const [temporaryName, setTemporaryName] = useState(null)
 
     useEffect(() => {
         AsyncStorage.getItem("userName", function(error, data) {
@@ -16,11 +17,12 @@ function Home(props) {
           });
         }, []);
     
-    if (name === '') {
-        function GoToMap() {
+    if (name === null) {
+        var GoToMap = () => {
             props.navigation.navigate('TabButton', {screen: 'Map'});
             AsyncStorage.setItem("userName", name);
-            props.saveUserName(name);
+            setName(temporaryName);
+            props.saveUserName(temporaryName);
         }
         return (
             <View style={styles.container}>
@@ -35,8 +37,8 @@ function Home(props) {
                             color='white'
                             />}
                         placeholder='your name'
-                        onChangeText={(value) => setName(value)}
-                        value={name}
+                        onChangeText={(value) => setTemporaryName(value)}
+                        value={temporaryName}
                     />
                 <Button title='Go to Map' onPress={() => GoToMap()}></Button>
                 </ImageBackground>

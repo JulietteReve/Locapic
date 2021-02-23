@@ -9,7 +9,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 
-
 function Map(props) {
 
 
@@ -43,14 +42,14 @@ function Map(props) {
 
           AsyncStorage.getItem("SavePOIList", function(error, data) {
             var POIData = JSON.parse(data);
-            for (let i=0; i<POIData.length; i++) {
+            if (POIData) {
+              for (let i=0; i<POIData.length; i++) {
                 props.addToPOIList(POIData[i])
+              }
             }
         });
-
       }, []);
 
-    console.log(props.POILIst);
 
     useEffect(() => {
         AsyncStorage.setItem("SavePOIList", JSON.stringify(props.POILIst)); 
