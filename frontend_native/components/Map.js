@@ -30,6 +30,7 @@ function Map(props) {
         setVisible(!visible);
     };
     
+    // console.log('userlist', listUsers);
 
     useEffect(() => {
         async function askPermissions() {
@@ -37,7 +38,7 @@ function Map(props) {
             if (status === 'granted') {
               Location.watchPositionAsync({ distanceInterval: 2 },
                 (location) => {
-                  setLocation({latitude: location.coords.latitude, longitude: location.coords.longitude });
+                  // setLocation({latitude: location.coords.latitude, longitude: location.coords.longitude });
                   var myLocation = JSON.stringify(location)
                   socket.emit("sendPosition", myLocation, props.userName);
                 }
@@ -60,8 +61,9 @@ function Map(props) {
       useEffect(() => {
         socket.on('sendPositionToAll', (location, userName)=> {
           var myLocation = JSON.parse(location);
+          var copyListUsers = [...listUsers];
           var newLocation = {name: userName, latitude: myLocation.coords.latitude, longitude: myLocation.coords.longitude};
-          var result = listUsers.filter(item => item.name != userName);
+          var result = copyListUsers.filter(item => item.name !== userName);
           setListUsers([...result, newLocation]);
         });
       }, [listUsers]);
@@ -106,14 +108,14 @@ function Map(props) {
            {listUsers.length > 0 ?
             listUsers.map((element, i) => {
               return(
-                <Marker coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#333333" title={element.name}/>)
+                <Marker coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#264653" title={element.name}/>)
             })
             : null }           
             
             {props.POILIst.length > 0 ?
             props.POILIst.map((element, i) => {
                 return(
-                <Marker coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#55efc4" title={element.title} description={element.description}/>)
+                <Marker coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#f4a261" title={element.title} description={element.description}/>)
             })
             : null }
 

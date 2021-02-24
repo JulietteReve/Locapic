@@ -20,7 +20,7 @@ function Home(props) {
     if (name === null) {
         var GoToMap = () => {
             props.navigation.navigate('TabButton', {screen: 'Map'});
-            AsyncStorage.setItem("userName", name);
+            AsyncStorage.setItem("userName", temporaryName);
             setName(temporaryName);
             props.saveUserName(temporaryName);
         }
