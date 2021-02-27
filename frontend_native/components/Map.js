@@ -53,20 +53,23 @@ function Map(props) {
               for (let i=0; i<POIData.length; i++) {
                 props.addToPOIList(POIData[i])
               }
-            }
-          
+            } 
         });
-      }, []);
-    
-      useEffect(() => {
-        socket.on('sendPositionToAll', (location, userName)=> {
+        
+        socket.on('sendPositionToAll', (location, userName)=> { 
           var myLocation = JSON.parse(location);
-          var copyListUsers = [...listUsers];
-          var newLocation = {name: userName, latitude: myLocation.coords.latitude, longitude: myLocation.coords.longitude};
-          var result = copyListUsers.filter(item => item.name !== userName);
-          setListUsers([...result, newLocation]);
+          setListUsers(previous => {
+            let intermTab = [...previous];
+            let filteredTab = intermTab.filter(item => item.name !== userName);
+            let newTab= [...filteredTab, {name: userName, latitude: myLocation.coords.latitude, longitude: myLocation.coords.longitude}]
+            return newTab
+          })
         });
-      }, [listUsers]);
+
+        return () => {
+          socket.removeAllListeners('sendPositionToAll')
+        }
+      }, []);
 
 
     useEffect(() => {
@@ -108,21 +111,21 @@ function Map(props) {
            {listUsers.length > 0 ?
             listUsers.map((element, i) => {
               return(
-                <Marker coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#264653" title={element.name}/>)
+                <Marker key={i} coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#264653" title={element.name}/>)
             })
             : null }           
             
             {props.POILIst.length > 0 ?
             props.POILIst.map((element, i) => {
                 return(
-                <Marker coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#f4a261" title={element.title} description={element.description}/>)
+                <Marker key={i} coordinate={{ latitude : element.latitude, longitude : element.longitude}} pinColor="#f4a261" title={element.title} description={element.description}/>)
             })
             : null }
 
         </MapView>
         <Button title="ADD POI" color="#ff7675" onPress={() => setOpenPOI(true)}/>
         <Overlay isVisible={visible} onBackdropPress={toggleOverlay} overlayStyle={{width: '70%'}}>
-            <Input
+          <Input
                 containerStyle = {{marginBottom: 25, width: '50%'}}
                 placeholder='place'
                 onChangeText={(value) => setTitle(value)}
@@ -135,7 +138,7 @@ function Map(props) {
                 value={description}
             />
             <Button title='Add' color='#d63031' onPress={(e) => {addaPOIToPOIList()}}/>
-      </Overlay>
+        </Overlay>
     </View>
       
   );
